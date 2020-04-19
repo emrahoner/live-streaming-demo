@@ -1,0 +1,17 @@
+body {
+  font-family: sans-serif;
+}
+
+video {
+  max-width: 100%;
+  width: 100%;
+  border: 1px solid #aaa;
+}
+
+.container {
+  margin-top: 4rem;
+}
+
+.list-group-item {
+  padding: .25rem .5rem
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Live Streaming with WebRTC</title>
+
+  <!-- Bootstrap style sheet -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <!-- Our application's style sheet -->
+  <link rel="stylesheet" href="/css/main.css" />
+
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="card">
+      <h5 class="card-header">Live Streaming with WebRTC</h5>
+      <div class="card-body">
+        <!-- Room selection panel -->
+        <div id="room-selection">
+          <div class="row">
+            <div class="col">
+              <input type="text" class="form-control" placeholder="Username" id="username" />
+            </div>
+            <div class="col">
+              <input type="text" class="form-control" placeholder="Room name" id="roomName" />
+            </div>
+            <div class="col-3">
+              <button class="btn btn-primary btn-block" type="button" id="joinButton">Join or Create Room</button>
+            </div>
+          </div>
+        </div>
+        <!-- ENDOF: Room selection panel -->
+
+        <!-- Room panel -->
+        <div id="streaming-room">
+          <div class="row mb-3">
+            <div class="col-10">
+              <div class="row mb-3">
+                <div class="col">
+                  <button class="btn btn-success" type="button" style="margin-right: 1rem;">
+                    Sound On
+                  </button>
+                  <button class="btn btn-success" type="button" style="margin-right: 1rem;">
+                    Camera On
+                  </button>
+                  <button class="btn btn-info" type="button" style="margin-right: 1rem;">
+                    Change layout
+                  </button>
+                  <button class="btn btn-danger" type="button" style="margin-right: 1rem;">
+                    Leave room
+                  </button>
+                </div>
+              </div>
+              <div class="row" id="video-streams">
+
+              </div>
+            </div>
+            <div class="col-2">
+              <div style="text-align: center;">
+                <h6>Peers</h6>
+              </div>
+              <ul id="peers-list" class="list-group">
+                
+              </ul>
+            </div>
+          </div>
+          <p>
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseLogs" aria-expanded="false" aria-controls="collapseLogs">
+              Toggle Logs
+            </button>
+          </p>
+          <div class="collapse" id="collapseLogs">
+            <div class="card card-body">
+              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+            </div>
+          </div>
+        </div>
+        <!-- ENDOF: Room panel -->
+      </div>
+    </div>    
+  </div>
+  
+  <!-- Bootstrap library and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <!-- Socket.io library -->
+  <script src="/js/third-party/socket.io.js"></script>
+  <!-- Adapter.js (Shim for webrtc api) -->
+  <script src="/js/third-party/adapter.js"></script>
+  <!-- Our application's javascript module -->
+  <script type="module" src="/js/main.js"></script>
+
+</body>
+
+</html>
