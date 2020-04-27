@@ -3,6 +3,7 @@
 import socket from '/js/socket.js'
 import session from '/js/user-session.js'
 import rtc from '/js/rtc.js'
+import logger from '/js/logger.js'
 
 const pages = {
     roomSelection: {
@@ -14,11 +15,19 @@ const pages = {
     streamingRoom: {
         elem: document.getElementById('streaming-room'),
         videoStreams: document.getElementById('video-streams'),
-        peerList: document.getElementById('peers-list')
+        peerList: document.getElementById('peers-list'),
+        usernameLabel: document.getElementById('username-label'),
+        roomLabel: document.getElementById('room-label'),
+        logs: document.getElementById('logs'),
+        soundButton: document.getElementById('sound-on-off'),
+        cameraButton: document.getElementById('camera-on-off'),
+        changeLayoutButton: document.getElementById('change-layout'),
+        leaveRoomButton: document.getElementById('leave-room'),
     }
 }
 
 const peerList = {}
+let localStream
 
 function addVideo(name, stream) {
     if(peerList[name] && peerList[name].video) {
@@ -67,12 +76,23 @@ function removeListItem(peer) {
 
 export default {
     init() {
+        this.audio = true
+        this.video = true
+
         for(let page in pages) {
             pages[page].elem.style.display = 'none'
         }
         pages.roomSelection.elem.style.display = 'block'
 
         pages.roomSelection.joinButton.addEventListener('click', this.joinRoom.bind(this))
+        pages.streamingRoom.soundButton.addEventListener('click', this.toggleAudio.bind(this))
+        pages.streamingRoom.cameraButton.addEventListener('click', this.toggleVideo.bind(this))
+        pages.streamingRoom.leaveRoomButton.addEventListener('click', this.leaveRoom.bind(this))
+
+        logger.on('log', log => {
+            var result = `<div style="color: ${ log.type === 'error' ? 'red' : 'black' }">${ log.args.reduce((prev, curr) => prev === "" ? curr : prev + `<div style="padding-left: 20px">${ JSON.stringify(curr) }</div>`, "") }</div>`
+            pages.streamingRoom.logs.innerHTML = result + pages.streamingRoom.logs.innerHTML
+        })
 
         window.addEventListener('beforeunload', () => {
             if(session.room && session.username) {
@@ -90,15 +110,20 @@ export default {
             }
         })
 
+        window.onerror = function(message, source, lineno, colno, error) {
+            logger.error(message, source, lineno, colno, error)
+        }
+
         socket.on('peers', (peers) => {
             peers.forEach(peer => {
                 addListItem(peer.username)
             });
         })
-        rtc.on('localStreamCreated', ({ stream }) => {
-            addVideo('local', stream)
+        rtc.on('localStreamUpdated', ({ stream }) => {
+            localStream = stream
+            addVideo('local', localStream)
         })
-        rtc.on('remoteStreamCreated', ({ peer, stream }) => {
+        rtc.on('remoteStreamUpdated', ({ peer, stream }) => {
             addVideo(peer, stream)
             addListItem(peer)
         })
@@ -115,8 +140,31 @@ export default {
             return
         }
         rtc.init()
+        pages.streamingRoom.usernameLabel.innerText = username
+        pages.streamingRoom.roomLabel.innerText = roomName
         this.goToPage('streamingRoom')
         session.create(username, roomName)
+    },
+    leaveRoom() {
+        rtc.close()
+        pages.roomSelection.username.value = ''
+        pages.roomSelection.roomName.value = ''
+        this.goToPage('roomSelection')
+    },
+    toggleAudio() {
+        this.audio = !this.audio
+        rtc.toggleAudio(this.audio)
+        pages.streamingRoom.soundButton.innerHTML = this.audio ? "Sound On" : "Sound Off"
+        pages.streamingRoom.soundButton.classList.remove(this.audio ? "btn-danger" : "btn-success")
+        pages.streamingRoom.soundButton.classList.add(this.audio ? "btn-success" : "btn-danger")
+    },
+    toggleVideo() {
+        this.video = !this.video
+        rtc.toggleVideo(this.video)
+        pages.streamingRoom.cameraButton.innerHTML = this.video ? "Camera On" : "Camera Off"
+        pages.streamingRoom.cameraButton.classList.remove(this.video ? "btn-danger" : "btn-success")
+        pages.streamingRoom.cameraButton.classList.add(this.video ? "btn-success" : "btn-danger")
+        this.video ? addVideo('local', localStream) : addVideo('local', new MediaStream())
     },
     goToPage(page) {
         for(let page in pages) {

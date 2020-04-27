@@ -41,6 +41,7 @@ class RoomService {
     }
 
     leaveRoom(roomName, username) {
+        if(!this.rooms[roomName] || !this.rooms[roomName].peers) return
         let index = this.rooms[roomName].peers.findIndex(x => x.username === username)
         this.rooms[roomName].peers.splice(index, 1)
         this.emit('leaved', { room: this.rooms[roomName], username })

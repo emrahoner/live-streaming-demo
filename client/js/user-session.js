@@ -10,5 +10,9 @@ export default {
     },
     get room() {
         return this._room
+    },
+    clear() {
+        this._username = undefined
+        this._room = undefined
     }
 }

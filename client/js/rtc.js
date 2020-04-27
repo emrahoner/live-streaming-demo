@@ -3,6 +3,7 @@
 import session from '/js/user-session.js'
 import logger from '/js/logger.js'
 import socket from '/js/socket.js';
+import { LSMediaStream } from '/js/media-stream.js';
 import eventEmitter from '/js/event-emitter.js'
 
 const config = {
@@ -48,15 +49,20 @@ function createPeerConnections(rtc, peers, localStream) {
 
 function createPeerConnection(rtc, peer, localStream) {
     const conn = new RTCPeerConnection(config)
+    let stream
     conn.onicecandidate = (event) => {
         logger.log(`Triggered ice candidate event`, event)
         if (event.candidate) {
             socket.candidate(peer, event.candidate)
         }
     }
-    conn.onaddstream = (event) => {
-        logger.log(`Added remote stream for user '${peer}'`);
-        rtc.emit('remoteStreamCreated', { peer, stream: event.stream })
+    conn.ontrack = (event) => {
+        logger.log(`Added remote ${event.track.kind} track for user '${peer}'`);
+        if(!stream) {
+            stream = new MediaStream()
+        }
+        stream.addTrack(event.track)
+        rtc.emit('remoteStreamUpdated', { peer, stream })
     }
     conn.onremovestream = (event) => {
         logger.log(`Removed remote stream for user '${peer}'`, event);
@@ -71,8 +77,22 @@ function createPeerConnection(rtc, peer, localStream) {
         }
     }
     logger.log(`Created peer connection for the user '${ peer }'`)
-    conn.addStream(localStream)
-    logger.log(`Set the local stream for the user '${ peer }'`)
+    localStream.getTracks().forEach(track => {
+        let sender
+        sender = conn.addTrack(track.track)
+        logger.log(`Added the ${ track.type } media track for the user '${ peer }'`)
+        track.on('stateChanged', event => {
+            if(sender) {
+                conn.removeTrack(sender)
+                sender = null
+                logger.log(`Removed the ${ track.type } media track for the user '${ peer }'`)
+            }
+            if (event.enabled) {
+                sender = conn.addTrack(event.track.track)
+                logger.log(`Added the ${ track.type } media track for the user '${ peer }'`)
+            }
+        });
+    })
     return conn
 }
 
@@ -108,8 +128,8 @@ export default eventEmitter.mixin({
             })
             .then(stream => {
                 logger.log('Local stream is created')
-                this.localStream = stream
-                this.emit('localStreamCreated', { stream })
+                this.localStream = new LSMediaStream(stream)
+                this.emit('localStreamUpdated', { stream: new MediaStream(stream.getVideoTracks()) })
                 socket.join(session.room, session.username)
             })
             .catch(e => {
@@ -178,5 +198,22 @@ export default eventEmitter.mixin({
 
             this.emit('closeConnection', { peer: response.peer })
         })
+    },
+    toggleAudio (enabled) {
+        this.localStream.toggleAudio(enabled)
+    },
+    toggleVideo (enabled) {
+        this.localStream.toggleVideo(enabled)
+    },
+    close () {
+        socket.leave(session.room, session.username)
+        for(var peer in peerConnections) {
+            peerConnections[peer].close()
+            this.emit('closeConnection', { peer })
+        }
+        this.localStream.getTracks().forEach(track => {
+            track.track.stop()
+        })
+        session.clear()
     }
 })

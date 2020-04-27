@@ -3,6 +3,9 @@
 
 <head>
 
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
   <title>Live Streaming with WebRTC</title>
 
   <!-- Bootstrap style sheet -->
@@ -21,13 +24,13 @@
         <!-- Room selection panel -->
         <div id="room-selection">
           <div class="row">
-            <div class="col">
+            <div class="col-lg col-sm-12 mb-3">
               <input type="text" class="form-control" placeholder="Username" id="username" />
             </div>
-            <div class="col">
+            <div class="col-lg col-sm-12 mb-3">
               <input type="text" class="form-control" placeholder="Room name" id="roomName" />
             </div>
-            <div class="col-3">
+            <div class="col-lg-3 col-sm-12 mb-3">
               <button class="btn btn-primary btn-block" type="button" id="joinButton">Join or Create Room</button>
             </div>
           </div>
@@ -37,19 +40,28 @@
         <!-- Room panel -->
         <div id="streaming-room">
           <div class="row mb-3">
+            <div class="col">
+              <span><b>Username: </b></span>
+              <span id="username-label"></span>
+              <span style="margin: 0 10px;"></span>
+              <span><b>Room: </b></span>
+              <span id="room-label"></span>
+            </div>
+          </div>
+          <div class="row mb-3">
             <div class="col-10">
               <div class="row mb-3">
                 <div class="col">
-                  <button class="btn btn-success" type="button" style="margin-right: 1rem;">
+                  <button id="sound-on-off" class="btn btn-success" type="button" style="margin-right: 1rem;">
                     Sound On
                   </button>
-                  <button class="btn btn-success" type="button" style="margin-right: 1rem;">
+                  <button id="camera-on-off" class="btn btn-success" type="button" style="margin-right: 1rem;">
                     Camera On
                   </button>
                   <button class="btn btn-info" type="button" style="margin-right: 1rem;">
                     Change layout
                   </button>
-                  <button class="btn btn-danger" type="button" style="margin-right: 1rem;">
+                  <button id="leave-room" class="btn btn-danger" type="button" style="margin-right: 1rem;">
                     Leave room
                   </button>
                 </div>
@@ -60,7 +72,7 @@
             </div>
             <div class="col-2">
               <div style="text-align: center;">
-                <h6>Peers</h6>
+                <h6><b>Peers</b></h6>
               </div>
               <ul id="peers-list" class="list-group">
                 
@@ -73,8 +85,8 @@
             </button>
           </p>
           <div class="collapse" id="collapseLogs">
-            <div class="card card-body">
-              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+            <div id="logs" class="card card-body" style="font-size: 0.7rem;">
+              
             </div>
           </div>
         </div>

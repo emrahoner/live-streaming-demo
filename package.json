@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "create-crt": "mkdir .crt && sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./.crt/localsigned.key -out ./.crt/localsigned.crt",
     "start": "node server/index.js",
     "start:local": "nodemon server/index.js"
   },
