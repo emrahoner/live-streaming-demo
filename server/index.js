@@ -4,27 +4,36 @@ const http = require('http');
 const socketio = require('socket.io');
 const roomService = require('./room-service')
 
-const app = express();
+function expressApp () {
+  const app = express();
+  app.use(express.static('client'))
+  return app
+}
 
-const httpServer = http.createServer(app)
-const io = socketio(httpServer)
-httpServer.listen(process.env.PORT || 8080)
+function httpServer(app) {
+  return http.createServer(app)
+}
 
-// const fs = require('fs');
-// const https = require('https');
-// const credentials = {
-//   key: fs.readFileSync('.crt/localsigned.key', 'utf8'), 
-//   cert: fs.readFileSync('.crt/localsigned.crt', 'utf8')
-// }
-// const httpsServer = https.createServer(credentials, app)
-// const io = socketio(httpsServer)
-// httpsServer.listen(process.env.HTTPS_PORT || 8081);
+function httpsServer(app) {
+  const fs = require('fs');
+  const https = require('https');
+  const credentials = {
+    key: fs.readFileSync('.crt/localsigned.key', 'utf8'), 
+    cert: fs.readFileSync('.crt/localsigned.crt', 'utf8')
+  }
+  return  https.createServer(credentials, app)
+}
 
-app.use(express.static('client'))
+const https = false
+const app = expressApp()
+const server = https ? httpsServer(app) : httpServer(app)
+const io = socketio(server)
 
-const sockets = {}
+server.listen(process.env.HTTPS_PORT || 8080);
 
 io.sockets.on('connection', function(socket) {
+
+  const sockets = {}
 
   // roomService.on('joined', function ({ room, username }) {
   //   let peers = roomService.getPeers(room.name, username)
